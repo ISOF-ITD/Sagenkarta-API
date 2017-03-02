@@ -1,0 +1,124 @@
+{
+	"api": [
+		{
+			"url": "/legends",
+			"description": "Gets a list of legends in Sagnagrunnur.",
+			"demoquery": "/legends"
+		},
+		{
+			"url": "/legends/search/:query",
+			"description": "Gets a list of legends in Sagnagrunnur based on a text search.",
+			"demoquery": "/legends/search/tilberi"
+		},
+		{
+			"url": "/legends/:num1/:num2",
+			"description": "Gets a paged list of legends in Sagnagrunnur.",
+			"demoquery": "/legends/0/20"
+		},
+		{
+			"url": "/legend/:id",
+			"description": "Gets information about a legend based on a given ID. Tags are a list of keywords which the legend has. Places are a list of places mentioned in the legend. Informants are list of either informants ('h') or collectors ('s') of this legend.",
+			"demoquery": "/legend/285"
+		},
+		{
+			"url": "/legends/tag/:id",
+			"description": "Gets a list of legends in Sagnagrunnur which have a specific keyword ID. Same as /tags/legends/:id.",
+			"demoquery": "/legends/tag/1"
+		},
+		{
+			"url": "/places",
+			"description": "Gets a list of places names from Sagnagrunnur.",
+			"demoquery": "/places"
+		},
+		{
+			"url": "/places/county/:county",
+			"description": "Gets a list of place names in a specific county (sýsla).",
+			"demoquery": "/places/county/Árnes01"
+		},
+		{
+			"url": "/places/municipality/:municipality",
+			"description": "Gets a list of place names in a specific municipality (hreppur).",
+			"demoquery": "/places/municipality/Helgaf01"
+		},
+		{
+			"url": "/places/tags/:tags",
+			"description": "Gets a list of places which are related to legends which are related to a specific tag/keyword.",
+			"demoquery": "/places/tags/732"
+		},
+		{
+			"url": "/place/:id",
+			"description": "Gets information about a place by a given ID. These information include a list of legends which mention the place and a list of people that lived there.",
+			"demoquery": "/place/320"
+		},
+		{
+			"url": "/place/key/:key",
+			"description": "Same as /place/:id but by a given key.",
+			"demoquery": "/place/key/BarFlj01"
+		},
+		{
+			"url": "/places/counties",
+			"description": "Gets a list of county IDs and keys in Sagnagrunnur.",
+			"demoquery": "/places/counties"
+		},
+		{
+			"url": "/locations",
+			"description": "Gets a list of places that are geo-located.",
+			"demoquery": "/locations"
+		},
+		{
+			"url": "/locations/legends",
+			"description": "Gets a list of places that are geo-located and related to legends.",
+			"demoquery": "/locations/legends"
+		},
+		{
+			"url": "/locations/tags/:tags",
+			"description": "Gets a list of places that are geo-located and related to legends which are related to a specific tag/keyword.",
+			"demoquery": "/locations/tags/732"
+		},
+		{
+			"url": "/keyplaces",
+			"description": "Gets a list of places from the National Library keyplace list.",
+			"demoquery": "/keyplaces"
+		},
+		{
+			"url": "/keyplaces/municipality",
+			"description": "Gets a list of municipality keys from the National Library keyplace list.",
+			"demoquery": "/keyplaces/municipality"
+		},
+		{
+			"url": "/tags",
+			"description": "Gets a list of all tags/keywords. Each record has a number indicating how many legends are connected to the tag.",
+			"demoquery": "/tags"
+		},
+		{
+			"url": "/tags/legends/:id",
+			"description": "Gets a list of legends in Sagnagrunnur which have a specific keyword ID. Same as /legends/tag/:id.",
+			"demoquery": "/tags/legends/1"
+		},
+		{
+			"url": "/tags/relations/:id",
+			"description": "Get a list of tags which are related to a given tag ID. The relations are based on which other tags are related to legends with the given tag ID.",
+			"demoquery": "/tags/relations/1"
+		},
+		{
+			"url": "/persons",
+			"description": "Gets a list of persons in Sagnagrunnur.",
+			"demoquery": "/persons"
+		},
+		{
+			"url": "/person/:id",
+			"description": "Gets a information about a person in Sagnagrunnur including dates of birth and death if available as well as the persons home and list of legends told or collected by that person.",
+			"demoquery": "/person/55"
+		},
+		{
+			"url": "/persons/search/name/:name",
+			"description": "Search for a specific person name in Sagnagrunnur.",
+			"demoquery": "/persons/search/name/Helga"
+		},
+		{
+			"url": "/persons/search/birth/:year(/:month(/:day))",
+			"description": "Search for persons in Sagnagrunnur based on their date of birth.",
+			"demoquery": "/persons/search/birth/1842"
+		}
+	]
+}
