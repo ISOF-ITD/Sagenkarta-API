@@ -7,7 +7,7 @@
 		Remove this if you use the .htaccess -->
 		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-		<title>Sagnagrunnur API</title>
+		<title>Sägenkarta API</title>
 		<meta name="description" content="">
 		<meta name="author" content="Trausti Dagsson">
 		<link rel="stylesheet" href="../css/reset.css"/>
@@ -126,9 +126,9 @@
 		</style>
 		<script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
 		<script type="text/javascript" src="http://code.jquery.com/jquery-2.1.0.min.js"></script>
-		<script type="text/javascript" src="../js/underscore-min.js"></script>
-        <script type="text/javascript" src="../js/backbone-min.js"></script>		
-		<script type="text/javascript" src="api.js"></script>
+		<script type="text/javascript" src="js/underscore-min.js"></script>
+        <script type="text/javascript" src="js/backbone-min.js"></script>		
+		<script type="text/javascript" src="js/api.js"></script>
 	</head>
 
 	<body>
@@ -148,14 +148,14 @@
 				<p><%= model.get('description') %></p>
 				<a class="results-demo-link">Results demo.</a>
 				<div class="box results-demo">
-					<div class="url">sagnagrunnur.com/grunnur/api<%= model.get('demoquery') %></div>
+					<div class="url">www4.sprakochfolkminnen.se/sagner/api<%= model.get('demoquery') %></div>
 					<pre class="results-container"><div class="loading">Loading data...</div></pre>
 				</div>
 			</div>
 		</script>
 
 		<script type="text/template" id="methodsMenuTemplate">
-			<h2>Sagnagrunnur API</h2>
+			<h2>Sägenkarta API</h2>
 			<% _.each(models, function(item, index) { %>
 				<a href="#a<%= item.cid %>"><%= item.get('url') %></a>
 			<% }); %>

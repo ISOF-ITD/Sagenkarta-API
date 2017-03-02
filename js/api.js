@@ -36,7 +36,7 @@ var ApiMethodView = Backbone.View.extend({
 		var _this = this;
 		if (!this.$('.results-container').hasClass('loaded')) {
 			this.$('.results-container').addClass('loaded')
-			$.getJSON('/grunnur/api'+this.model.get('demoquery'), function(response) {
+			$.getJSON('http://www4.sprakochfolkminnen.se/sagner/api'+this.model.get('demoquery'), function(response) {
 				console.log(response);
 				_this.$('.results-container').text(JSON.stringify(response, null, 5));
 			});
@@ -44,9 +44,11 @@ var ApiMethodView = Backbone.View.extend({
 	},
 
 	render: function() {
-		var template = _.template($("#methodViewTemplate").html(), {model: this.model});
+		var template = _.template($("#methodViewTemplate").html());
 
-		this.$el.html(template);
+		this.$el.html(template({
+			model: this.model
+		}));
 		this.$el.find('.results-demo').hide();
 
 		return this;
@@ -63,7 +65,9 @@ var ApiView = Backbone.View.extend({
 		this.$el.empty();
 
 		this.collection.each(function(model) {
-			var renderedEl = (new ApiMethodView({model: model})).render().$el;
+			var renderedEl = (new ApiMethodView({
+				model: model
+			})).render().$el;
       		_this.$el.append(renderedEl);
     	});
 	}
@@ -75,8 +79,10 @@ var ApiMenuView = Backbone.View.extend({
 	},
 
 	render: function() {
-		var template = _.template($("#methodsMenuTemplate").html(), {models: this.collection.models});
-		this.$el.html(template);
+		var template = _.template($("#methodsMenuTemplate").html());
+		this.$el.html(template({
+			models: this.collection.models
+		}));
 	}
 });
 
