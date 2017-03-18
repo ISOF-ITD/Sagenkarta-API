@@ -98,6 +98,8 @@ $app->get('/county', 'getCounty');
 $app->get('/harad', 'getHarad');
 $app->get('/socken', 'getSocken');
 
+$app->get('/json_export/:num1/:num2', 'getJsonExport');
+
 $app->contentType('application/json;charset=utf-8');
 $app->response()->header('Access-Control-Allow-Origin', '*');
 $app->run();
@@ -427,10 +429,15 @@ function getRecordsArray(
 
 	if (!is_null($search) && $search != '') {
 		if ($searchField == 'record') {
-			array_push($where, '('.
-				'LOWER(records.title) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%" OR '.
-				'LOWER(records.text) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%"'.
-				')');
+			if (strpos($search, ';') !== false) {
+				array_push($where, 'MATCH(text) AGAINST("'.str_replace(';', '+', $search).'")');
+			}
+			else {			
+				array_push($where, '('.
+					'LOWER(records.title) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%" OR '.
+					'LOWER(records.text) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%"'.
+					')');
+			}
 		}
 		else if ($searchField == 'person') {
 			array_push($where, '('.
@@ -994,10 +1001,15 @@ function getLocations(
 
 		if (!is_null($search) && $search != '') {
 			if ($searchField == 'record') {
-				array_push($where, '('.
-					'LOWER(records.title) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%" OR '.
-					'LOWER(records.text) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%"'.
-					')');
+				if (strpos($search, ';') !== false) {
+					array_push($where, 'MATCH(records.text) AGAINST("'.str_replace(';', '+', $search).'")');
+				}
+				else {
+					array_push($where, '('.
+						'LOWER(records.title) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%" OR '.
+						'LOWER(records.text) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%"'.
+						')');
+				}
 			}
 			else if ($searchField == 'person') {
 				array_push($where, '('.
@@ -1116,15 +1128,17 @@ function getLocations(
 
 	//	array_push($join, 'INNER JOIN harad ON harad.id = socken.harad');
 
-		$sql = 'SELECT DISTINCT socken.id, socken.name, socken.lat, socken.lng /*, harad.name harad, harad.landskap, harad.lan county */ '.
+		$sql = 'SELECT DISTINCT socken.id, socken.name, socken.lat, socken.lng, COUNT(records.id) c /*, harad.name harad, harad.landskap, harad.lan county */ '.
 			'FROM socken '.
 			(
 				count($join) > 0 ? ' '.implode(' ', $join) : ''
 			).
 			(
 				count($where) > 0 ? ' WHERE '.implode(' AND ', $where) : ''
-			)
+			).
+			' GROUP BY socken.id'
 		;
+
 		
 		$db = getConnection();
 
@@ -1138,7 +1152,8 @@ function getLocations(
 	//			'landskap' => $row['landskap'],
 	//			'county' => $row['county'],
 				'lat' => $row['lat'],
-				'lng' => $row['lng']
+				'lng' => $row['lng'],
+				'c' => $row['c']
 			));
 		}
 	}
@@ -1306,6 +1321,36 @@ function getHomes(
 		'data' => $data
 	));
 
+}
+
+function getJsonExport($num1, $num2) {
+	$db = getConnection();
+
+	$sql = 'SELECT records.id, '.
+		'records.title, '.
+		'records.text, '.
+		'records.comment, '.
+		'records.category, '.
+		'categories.name categoryname, '.
+		'records.type, '.
+		'records.year, '.
+		'records.archive, '.
+		'records.archive_id, '.
+		'records.archive_page, '.
+		'records.informant_name, '.
+		'records.source FROM records LEFT JOIN categories ON categories.id = records.category '.
+		'LIMIT '.$num1.', '.$num2;
+
+	$res = $db->query($sql);
+
+	$data = array();
+	while ($row = $res->fetch_assoc()) {
+		array_push($data, getRecordObj($row));
+	}
+
+	echo json_encode_is(array(
+		'data' => $data
+	));	
 }
 
 function getSocken() {
