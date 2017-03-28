@@ -247,7 +247,8 @@ function getRecordObj($row) {
 
 	$mediaRes = $db->query('SELECT '.
 		'media.source, '.
-		'media.type '.
+		'media.type, '.
+		'media.title '.
 		'FROM '.
 		'media '.
 		'INNER JOIN records_media ON records_media.media = media.id '.
@@ -260,7 +261,8 @@ function getRecordObj($row) {
 	while ($mediaRow = $mediaRes->fetch_assoc()) {
 		array_push($media, array(
 			'source' => $mediaRow['source'], 
-			'type' => $mediaRow['type']
+			'type' => $mediaRow['type'],
+			'title' => $mediaRow['title']
 		));
 	}
 		
