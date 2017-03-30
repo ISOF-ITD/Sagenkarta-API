@@ -90,7 +90,7 @@ $app->get('/locations(/)'.
 		'(person_name/:person_name/?)', 
 	'getLocations');
 
-$app->get('/place/:place_id', 'getPlace');
+$app->get('/place/:place_id(/)(type/:type/?)', 'getPlace');
 
 $app->get('/landskap', 'getLandskap');
 $app->get('/county', 'getCounty');
@@ -1152,7 +1152,7 @@ function getLocations(
 	));
 }
 
-function getPlace($id) {
+function getPlace($id, $type = null) {
 	$sql = 'SELECT socken.id, socken.name, socken.lat, socken.lng, harad.name harad, harad.landskap, harad.lan county '.
 		'FROM socken INNER JOIN harad ON harad.id = socken.harad WHERE socken.id = '.$id;
 
@@ -1163,7 +1163,7 @@ function getPlace($id) {
 	$row = $res->fetch_assoc();
 
 
-	$records = getRecordsArray(0, 200, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, $id);
+	$records = getRecordsArray(0, 200, null, null, $type, null, null, null, null, null, null, null, null, null, null, null, null, null, null, $id);
 
 	$persons = array();
 
