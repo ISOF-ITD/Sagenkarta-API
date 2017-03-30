@@ -87,8 +87,7 @@ $app->get('/locations(/)'.
 		'(person_socken/:person_socken/?)'.
 		'(person_place/:person_place/?)'.
 
-		'(person_firstname/:person_firstname/?)'.
-		'(person_surname/:person_surname/?)', 
+		'(person_name/:person_name/?)', 
 	'getLocations');
 
 $app->get('/place/:place_id', 'getPlace');
@@ -193,9 +192,8 @@ function getRecordObj($row) {
 	}
 
 	$personsSql = 'SELECT '.
-		'persons.firstname, '.
 		'persons.id, '.
-		'persons.surname, '.
+		'persons.name personname, '.
 		'persons.gender, '.
 		'persons.birth_year, '.
 		'records_persons.relation, '.
@@ -225,8 +223,7 @@ function getRecordObj($row) {
 	while ($personsRow = $personsRes->fetch_assoc()) {
 		array_push($persons, array(
 			'id' => $personsRow['id'], 
-			'firstname' => $personsRow['firstname'],
-			'surname' => $personsRow['surname'],
+			'name' => $personsRow['personname'],
 			'birth_year' => $personsRow['birth_year'],
 			'gender' => $personsRow['gender'],
 			'relation' => (
@@ -443,8 +440,7 @@ function getRecordsArray(
 		}
 		else if ($searchField == 'person') {
 			array_push($where, '('.
-				'LOWER(persons.firstname) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%" OR '.
-				'LOWER(persons.surname) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%"'.
+				'LOWER(persons.name) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%"'.
 				')');
 		}
 		else if ($searchField == 'place') {
@@ -725,8 +721,7 @@ function getPerson($id) {
 
 	$data = array(
 		'id' => $row['id'], 
-		'firstname' => $row['firstname'],
-		'surname' => $row['surname'],
+		'name' => $row['name'],
 		'birth_year' => $row['birth_year'],
 		'gender' => $row['gender'],
 		'address' => $row['address'],
@@ -764,7 +759,7 @@ function getPersons($relation = null, $gender = null, $category = null, $categor
 		array_push($where, 'LOWER(gender) = "'.strtolower($gender).'"');
 	}
 
-	$sql = 'SELECT persons.id, persons.firstname, persons.surname, persons.gender, persons.birth_year, '.
+	$sql = 'SELECT persons.id, persons.name, persons.gender, persons.birth_year, '.
 		'(SELECT COUNT(*) FROM records_persons WHERE records_persons.person = persons.id) recordscount '.
 		'FROM persons '.
 		(
@@ -814,8 +809,7 @@ function getPersons($relation = null, $gender = null, $category = null, $categor
 
 		array_push($data, array(
 			'id' => $row['id'], 
-			'firstname' => $row['firstname'],
-			'surname' => $row['surname'],
+			'name' => $row['name'],
 			'birth_year' => $row['birth_year'],
 			'gender' => $row['gender'],
 			'records' => $row['recordscount'],
@@ -963,8 +957,7 @@ function getLocations(
 		$person_harad = null,
 		$person_socken = null,
 		$person_place = null,
-		$person_firstname = null,
-		$person_surname = null
+		$person_name = null
 	) {
 	$join = array();
 	$where = array();
@@ -988,8 +981,7 @@ function getLocations(
 	}
 	else {
 		if (!is_null($gender) || 
-			!is_null($person_firstname) || 
-			!is_null($person_surname) || 
+			!is_null($person_name) || 
 			!is_null($search) || 
 			!is_null($type) || 
 			!is_null($category) || 
@@ -1015,8 +1007,7 @@ function getLocations(
 			}
 			else if ($searchField == 'person') {
 				array_push($where, '('.
-					'LOWER(persons.firstname) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%" OR '.
-					'LOWER(persons.surname) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%"'.
+					'LOWER(persons.name) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%"'.
 					')');
 			}
 			else if ($searchField == 'place') {
@@ -1057,8 +1048,7 @@ function getLocations(
 
 		if (
 			(!is_null($gender) && $gender != '') || 
-			(!is_null($person_firstname) && $person_firstname != '') || 
-			(!is_null($person_surname) && $person_surname != '') || 
+			(!is_null($person_name) && $person_name != '') || 
 			(!is_null($person_county) && $person_county != '') || 
 			(!is_null($person_harad) && $person_harad != '') || 
 			(!is_null($person_landskap) && $person_landskap != '') || 
@@ -1097,12 +1087,8 @@ function getLocations(
 			array_push($where, 'LOWER(persons.gender) = "'.strtolower($gender).'"');
 		}
 
-		if (!is_null($person_firstname) && $person_firstname != '') {
-			array_push($where, 'LOWER(persons.firstname) = "'.strtolower($person_firstname).'"');
-		}
-
-		if (!is_null($person_surname) && $person_surname != '') {
-			array_push($where, 'LOWER(persons.surname) = "'.strtolower($person_surname).'"');
+		if (!is_null($person_name) && $person_name != '') {
+			array_push($where, 'LOWER(persons.name) = "'.strtolower($person_name).'"');
 		}
 
 		if (!is_null($person_county) && $person_county != '') {
@@ -1182,8 +1168,7 @@ function getPlace($id) {
 	$persons = array();
 
 	$personsRes = $db->query('SELECT '.
-		'persons.firstname, '.
-		'persons.surname, '.
+		'persons.name, '.
 		'persons.gender, '.
 		'persons.birth_year, '.
 		'persons.id '.
@@ -1196,8 +1181,7 @@ function getPlace($id) {
 	while ($personRow = $personsRes->fetch_assoc()) {
 		array_push($persons, array(
 			'id' => $personRow['id'], 
-			'firstname' => $personRow['firstname'],
-			'surname' => $personRow['surname'],
+			'name' => $personRow['name'],
 			'birth_year' => $personRow['birth_year'],
 			'gender' => $personRow['gender']
 		));
@@ -1206,8 +1190,7 @@ function getPlace($id) {
 	$informants = array();
 
 	$informantsRes = $db->query('SELECT DISTINCT '.
-		'persons.firstname, '.
-		'persons.surname, '.
+		'persons.name, '.
 		'persons.gender, '.
 		'persons.birth_year, '.
 		'persons.id '.
@@ -1223,8 +1206,7 @@ function getPlace($id) {
 	while ($informantsRow = $informantsRes->fetch_assoc()) {
 		array_push($informants, array(
 			'id' => $informantsRow['id'], 
-			'firstname' => $informantsRow['firstname'],
-			'surname' => $informantsRow['surname'],
+			'name' => $informantsRow['name'],
 			'birth_year' => $informantsRow['birth_year'],
 			'gender' => $informantsRow['gender']
 		));
