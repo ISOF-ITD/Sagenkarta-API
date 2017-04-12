@@ -99,6 +99,8 @@ $app->get('/socken', 'getSocken');
 
 $app->get('/json_export/:num1/:num2', 'getJsonExport');
 
+$app->post('/feedback', 'sendFeedbackMail');
+
 $app->contentType('application/json;charset=utf-8');
 $app->response()->header('Access-Control-Allow-Origin', '*');
 $app->run();
@@ -1426,6 +1428,30 @@ function getCounty() {
 	}
 	
 	echo json_encode_is($data);
+}
+
+function sendFeedbackMail() {
+	$app = \Slim\Slim::getInstance();
+	$request = $app->request();
+	$requestBody = $request->getBody();
+
+	$requestData = json_decode($requestBody, true);
+
+	$headers = 'From: sagenkarta@sprakochfolkminnen.se' . "\r\n" .
+		'Reply-To: '.$requestData['from_email']."\r\n" .
+		'X-Mailer: PHP/' . phpversion();
+
+
+	if (mail('fredrik.skott@sprakochfolkminnen.se', $requestData['subject'], $requestData['message'], $headers)) {
+		echo json_encode_is(array(
+			'success' => 'mail sent from '.$requestData['from_email']
+		));
+	}
+	else {
+		echo json_encode_is(array(
+			'error' => 'mail sending failed'
+		));
+	}
 }
 
 function getConnection($dbName = null) {
