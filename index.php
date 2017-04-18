@@ -101,6 +101,8 @@ $app->get('/json_export/:num1/:num2', 'getJsonExport');
 
 $app->post('/feedback', 'sendFeedbackMail');
 
+$app->get('/lm_proxy/:x/:y/:z', 'lantmaterietProxy');
+
 $app->contentType('application/json;charset=utf-8');
 $app->response()->header('Access-Control-Allow-Origin', '*');
 $app->run();
@@ -1452,6 +1454,16 @@ function sendFeedbackMail() {
 			'error' => 'mail sending failed'
 		));
 	}
+}
+
+function lantmaterietProxy($x, $y, $z) {
+// http://maps.lantmateriet.se/topowebb/v1/wmts/1.0.0/topowebb/default/3006/{x}/{y}/{z}.png
+
+	global $app;
+
+	$app->contentType('image/png');
+
+	echo file_get_contents('http://ifsf0001:k7r9ZjQh4SN77N6p@maps.lantmateriet.se/topowebb/v1/wmts/1.0.0/topowebb/default/3006/'.$x.'/'.$y.'/'.$z.'.png');
 }
 
 function getConnection($dbName = null) {
