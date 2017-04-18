@@ -1437,12 +1437,12 @@ function sendFeedbackMail() {
 
 	$requestData = json_decode($requestBody, true);
 
-	$headers = 'From: sagenkarta@sprakochfolkminnen.se' . "\r\n" .
-		'Reply-To: '.$requestData['from_email']."\r\n" .
-		'X-Mailer: PHP/' . phpversion();
+	$headers = 'From: sagenkarta@sprakochfolkminnen.se'."\r\n".
+		'Reply-To: '.$requestData['from_email']."\r\n".
+		'X-Mailer: PHP/'.phpversion().
+		'Content-Type: text/html; charset=UTF-8';
 
-
-	if (mail('fredrik.skott@sprakochfolkminnen.se', $requestData['subject'], $requestData['message'], $headers)) {
+	if (mail('trausti.dagsson@sprakochfolkminnen.se', utf8_decode($requestData['subject']), utf8_decode($requestData['message']), $headers)) {
 		echo json_encode_is(array(
 			'success' => 'mail sent from '.$requestData['from_email']
 		));
