@@ -438,7 +438,8 @@ function getRecordsArray(
 			else {			
 				array_push($where, '('.
 					'LOWER(records.title) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%" OR '.
-					'LOWER(records.text) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%"'.
+					'LOWER(records.text) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%" OR '.
+					'LOWER(records.archive_id) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%"'.
 					')');
 			}
 		}
@@ -458,7 +459,8 @@ function getRecordsArray(
 		else {
 			array_push($where, '('.
 				'LOWER(records.title) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%" OR '.
-				'LOWER(records.text) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%"'.
+				'LOWER(records.text) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%" OR '.
+				'LOWER(records.archive_id) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%"'.
 				')');
 		}
 	}
@@ -1005,7 +1007,8 @@ function getLocations(
 				else {
 					array_push($where, '('.
 						'LOWER(records.title) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%" OR '.
-						'LOWER(records.text) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%"'.
+						'LOWER(records.text) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%" OR '.
+						'LOWER(records.archive_id) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%"'.
 						')');
 				}
 			}
