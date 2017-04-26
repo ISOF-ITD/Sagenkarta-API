@@ -170,6 +170,7 @@ function getRecordObj($row) {
 		'socken.name, '.
 		'socken.lat, '.
 		'socken.lng, '.
+		'socken.harad harad_id, '.
 		'harad.name harad, '.
 		'harad.landskap, '.
 		'harad.lan county '.
@@ -187,6 +188,7 @@ function getRecordObj($row) {
 		array_push($places, array(
 			'id' => $placeRow['id'], 
 			'name' => $placeRow['name'],
+			'harad_id' => $placeRow['harad_id'],
 			'harad' => $placeRow['harad'],
 			'landskap' => $placeRow['landskap'],
 			'county' => $placeRow['county'],
@@ -205,6 +207,7 @@ function getRecordObj($row) {
 		'socken.name, '.
 		'socken.lat, '.
 		'socken.lng, '.
+		'harad.id harad_id, '.
 		'harad.name harad, '.
 		'harad.landskap, '.
 		'harad.lan county '.
@@ -219,8 +222,7 @@ function getRecordObj($row) {
 
 //	echo $personsSql;
 
-	$personsRes = $db->query($personsSql
-	);
+	$personsRes = $db->query($personsSql);
 
 	$persons = [];
 
@@ -238,6 +240,7 @@ function getRecordObj($row) {
 				'id' => $personsRow['sockenid'],
 				'name' => $personsRow['name'],
 				'harad' => $personsRow['harad'],
+				'harad_id' => $personsRow['harad_id'],
 				'landskap' => $personsRow['landskap'],
 				'county' => $personsRow['county'],
 				'lat' => $personsRow['lat'],
