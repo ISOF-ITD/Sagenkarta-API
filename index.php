@@ -33,7 +33,8 @@ $app->get('/records/:num1/:num2(/)'.
 		'(record_place/:record_place/?)'.
 		'(person/:person/?)'.
 
-		'(only_categories/:only_categories/?)',
+		'(only_categories/:only_categories/?)'.
+		'(country/:country/?)',
 	'getRecords');
 
 $app->get('/record/:record', 'getRecord');
@@ -76,10 +77,11 @@ $app->get('/locations(/)'.
 
 		'(person_name/:person_name/?)'.
 
-		'(only_categories/:only_categories/?)',
+		'(only_categories/:only_categories/?)'.
+		'(country/:country/?)',
 	'getLocations');
 
-$app->get('/place/:place_id(/)(type/:type/?)(only_categories/:only_categories/?)', 'getPlace');
+$app->get('/place/:place_id(/)(type/:type/?)(only_categories/:only_categories/?)(country/:country/?)', 'getPlace');
 
 $app->get('/landskap', 'getLandskap');
 $app->get('/county', 'getCounty');
@@ -160,12 +162,14 @@ function getRecordObj($row) {
 		'socken.lat, '.
 		'socken.lng, '.
 		'socken.harad harad_id, '.
+		'socken.fylke, '.
+		'socken.lmId lm_id, '.
 		'harad.name harad, '.
 		'harad.landskap, '.
 		'harad.lan county '.
 		'FROM '.
 		'socken '.
-		'INNER JOIN harad ON socken.harad = harad.id '.
+		'LEFT JOIN harad ON socken.harad = harad.id '.
 		'INNER JOIN records_places ON socken.id = records_places.place '.
 		'WHERE '.
 		'records_places.record = '.$row['id'];
@@ -181,8 +185,10 @@ function getRecordObj($row) {
 			'harad' => $placeRow['harad'],
 			'landskap' => $placeRow['landskap'],
 			'county' => $placeRow['county'],
+			'fylke' => $placeRow['fylke'],
 			'lat' => $placeRow['lat'],
-			'lng' => $placeRow['lng']
+			'lng' => $placeRow['lng'],
+			'lm_id' => $placeRow['lm_id']
 		));
 	}
 
@@ -196,6 +202,7 @@ function getRecordObj($row) {
 		'socken.name, '.
 		'socken.lat, '.
 		'socken.lng, '.
+		'socken.lmId lm_id, '.
 		'harad.id harad_id, '.
 		'harad.name harad, '.
 		'harad.landskap, '.
@@ -233,7 +240,8 @@ function getRecordObj($row) {
 				'landskap' => $personsRow['landskap'],
 				'county' => $personsRow['county'],
 				'lat' => $personsRow['lat'],
-				'lng' => $personsRow['lng']
+				'lng' => $personsRow['lng'],
+				'lm_id' => $personsRow['lm_id']
 			)
 		));
 	}
@@ -344,7 +352,8 @@ function getRecords(
 
 		$person = null,
 
-		$only_categories = null) {
+		$only_categories = null,
+		$country = null) {
 	$data = getRecordsArray($num1, 
 		$num2, 
 		$search, 
@@ -368,7 +377,8 @@ function getRecords(
 		null,
 		null,
 		$person,
-		$only_categories);
+		$only_categories,
+		$country);
 
 	echo json_encode_is($data);
 }
@@ -401,7 +411,8 @@ function getRecordsArray(
 		$informant = null,
 		$person = null,
 
-		$onlyCategories = null) {
+		$only_categories = null,
+		$country = null) {
 	$where = array();
 	$join = array();
 
@@ -575,9 +586,21 @@ function getRecordsArray(
 		}
 	}
 
-	if ($onlyCategories) {
+	if ($only_categories) {
 		array_push($where, 'records.category != ""');
 	}
+
+	if (!is_null($country) && $country != '') {
+		if (strpos($country, ';')) {
+			$types = explode(';', $country);
+			$typeCriteria = '(LOWER(records.country) = "'.implode('" OR LOWER(records.country) = "', $country).'")';
+			array_push($where, $typeCriteria);
+		}
+		else {
+			array_push($where, 'LOWER(records.country) = "'.strtolower($country).'"');
+		}
+	}
+
 
 	array_push($join, 'LEFT JOIN categories ON categories.id = records.category');
 
@@ -845,12 +868,15 @@ function getLocations(
 		$person_socken = null,
 		$person_place = null,
 		$person_name = null,
-		$only_categories = null
+		$only_categories = null,
+		$country = null
 	) {
 	$join = array();
 	$where = array();
 
 	$data = array();
+
+	$recordCount = '';
 
 	if ($type == 'random') {
 		$max = is_null($category) ? 1000 : $category;
@@ -876,10 +902,13 @@ function getLocations(
 			!is_null($relation) || 
 			!is_null($yearFrom) || 
 			!is_null($yearTo) || 
-			!is_null($only_categories)
+			!is_null($only_categories) || 
+			!is_null($country)
 		) {
 			array_push($join, 'LEFT JOIN records_places ON records_places.place = socken.id');
 			array_push($join, 'LEFT JOIN records ON records.id = records_places.record');
+
+			$recordCount = ', COUNT(records.id) c';
 		}
 
 		if (!is_null($search) && $search != '') {
@@ -905,9 +934,9 @@ function getLocations(
 					'LOWER(harad.name) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%" OR '.
 					'LOWER(harad.landskap) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%" OR '.
 					'LOWER(harad.lan) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%" OR '.
+					'LOWER(socken.fylke) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%" OR '.
 					'LOWER(socken.name) LIKE "%'.mb_convert_case($search, MB_CASE_LOWER, "UTF-8").'%"'.
 					')');
-				array_push($join, 'INNER JOIN harad ON harad.id = socken.harad');
 			}
 			else {
 
@@ -1001,16 +1030,28 @@ function getLocations(
 			array_push($where, 'ps.id = '.$person_place);
 		}
 
-		if (!is_null($only_categories) && $only_categories != '') {
+		if (!is_null($only_categories) && strtolower($only_categories) == 'true') {
 			array_push($where, 'records.category != ""');
 		}
+
+		if (!is_null($country) && $country != '') {
+			if (strpos($country, ';')) {
+				$types = explode(';', $country);
+				$typeCriteria = '(LOWER(records.country) = "'.implode('" OR LOWER(records.country) = "', $country).'")';
+				array_push($where, $typeCriteria);
+			}
+			else {
+				array_push($where, 'LOWER(records.country) = "'.strtolower($country).'"');
+			}
+		}
+
 
 		array_push($where, 'socken.lat IS NOT NULL');
 		array_push($where, 'socken.lng IS NOT NULL');
 
-	//	array_push($join, 'INNER JOIN harad ON harad.id = socken.harad');
+		array_push($join, 'LEFT JOIN harad ON harad.id = socken.harad');
 
-		$sql = 'SELECT DISTINCT socken.id, socken.name, socken.lat, socken.lng, COUNT(records.id) c /*, harad.name harad, harad.landskap, harad.lan county */ '.
+		$sql = 'SELECT DISTINCT socken.id, socken.name, socken.lat, socken.lng'.$recordCount.', socken.lmId lm_id, harad.name harad, harad.landskap, harad.lan county, socken.fylke '.
 			'FROM socken '.
 			(
 				count($join) > 0 ? ' '.implode(' ', $join) : ''
@@ -1021,7 +1062,6 @@ function getLocations(
 			' GROUP BY socken.id'
 		;
 
-		
 		$db = getConnection();
 
 		$res = $db->query($sql);
@@ -1030,12 +1070,14 @@ function getLocations(
 			array_push($data, array(
 				'id' => $row['id'], 
 				'name' => $row['name'],
-	//			'harad' => $row['harad'],
-	//			'landskap' => $row['landskap'],
-	//			'county' => $row['county'],
+				'harad' => $row['harad'],
+				'landskap' => $row['landskap'],
+				'county' => $row['county'],
+				'fylke' => $row['fylke'],
+				'lm_id' => $row['lm_id'],
+				'c' => isset($row['c']) ? $row['c'] : 0,
 				'lat' => $row['lat'],
-				'lng' => $row['lng'],
-				'c' => $row['c']
+				'lng' => $row['lng']
 			));
 		}
 	}
@@ -1046,9 +1088,9 @@ function getLocations(
 	));
 }
 
-function getPlace($id, $type = null, $only_categories = null) {
-	$sql = 'SELECT socken.id, socken.name, socken.lat, socken.lng, harad.name harad, harad.landskap, harad.lan county '.
-		'FROM socken INNER JOIN harad ON harad.id = socken.harad WHERE socken.id = '.$id;
+function getPlace($id, $type = null, $only_categories = null, $country = null) {
+	$sql = 'SELECT socken.id, socken.name, socken.lat, socken.lng, socken.fylke, harad.name harad, harad.landskap, harad.lan county '.
+		'FROM socken LEFT JOIN harad ON harad.id = socken.harad WHERE socken.id = '.$id;
 
 	$db = getConnection();
 
@@ -1058,7 +1100,7 @@ function getPlace($id, $type = null, $only_categories = null) {
 
 	//	$num1, $num2, $search, $searchField, $type, $category, $yearFrom, $yearTo, $personRelation, $gender, $person_landskap, $person_county, $person_harad, $person_socken, $person_place, $record_landskap, $record_county, $record_harad, $record_socken, $record_place,null,null,$person,$only_categories
 
-	$records = getRecordsArray(0, 200, null, null, $type, null, null, null, null, null, null, null, null, null, null, null, null, null, null, $id, null, null, null, $only_categories);
+	$records = getRecordsArray(0, 200, null, null, $type, null, null, null, null, null, null, null, null, null, null, null, null, null, null, $id, null, null, null, $only_categories, $country);
 
 	$persons = array();
 
@@ -1113,6 +1155,7 @@ function getPlace($id, $type = null, $only_categories = null) {
 		'harad' => $row['harad'],
 		'landskap' => $row['landskap'],
 		'county' => $row['county'],
+		'fylke' => $row['fylke'],
 		'lat' => $row['lat'],
 		'lng' => $row['lng'],
 		'records' => $records['data'],
